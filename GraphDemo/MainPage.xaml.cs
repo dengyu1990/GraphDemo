@@ -5,6 +5,7 @@ using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media.Imaging;
+using System.Threading.Tasks;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -51,7 +52,12 @@ namespace GraphDemo
             Stopwatch watch = Stopwatch.StartNew();
 
             // Generate the data for the graph
-            generateGraphData(data);
+            //generateGraphData(data);
+            Task first = Task.Run(() => generateGraphData(data, 0, pixelWidth / 8));
+            Task second = Task.Run(() => generateGraphData(data, pixelWidth / 8, pixelWidth / 4));
+            Task third = Task.Run(() => generateGraphData(data, pixelWidth / 4, pixelWidth *3 / 8));
+            Task fourth = Task.Run(() => generateGraphData(data, pixelWidth * 3 / 8, pixelWidth / 2));
+            Task.WaitAll(first, second, third, fourth);
 
             // Display the time taken to generate the data
             duration.Text = $"Duration (ms): {watch.ElapsedMilliseconds}";
@@ -65,13 +71,13 @@ namespace GraphDemo
         }
 
         // Complex function that generates the data for the graph
-        private void generateGraphData(byte[] data)
+        private void generateGraphData(byte[] data, int partitionStart, int partitionEnd)
         {
             int a = pixelWidth / 2;
             int b = a * a;
             int c = pixelHeight / 2;
 
-            for (int x = 0; x < a; x++)
+            for (int x = partitionStart; x < partitionEnd; x++)
             {
                 int s = x * x;
                 double p = Math.Sqrt(b - s);
